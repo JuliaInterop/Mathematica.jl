@@ -13,6 +13,8 @@ using Mathematica
 Fibonacci(1000)
 #=> 4346655768693745643568852767...
 ```
+This should work so long as either `math` is on the path (normally true on linux). `Mathematica.jl` will also look for `math.exe` on Windows, which should work for Mathematica versions 8 or 9 installed in default locations. If it doesn't work for you, open an issue.
+
 As well the Julia wrappers defined in the `Mathematica` module, you can use the `@math` macro:
 
 ```julia
