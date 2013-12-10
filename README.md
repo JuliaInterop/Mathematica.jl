@@ -1,4 +1,4 @@
-# Mathematica
+# Mathematica.jl
 
 lets you call Mathematica functions from Julia.
 
