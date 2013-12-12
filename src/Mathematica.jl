@@ -18,7 +18,7 @@ const macros = quote
 
   # Macros to import, in alphabetical order.
   Integrate::Expr
-  Plot
+  D::Expr
 
 end
 
@@ -27,6 +27,7 @@ end
 # -----------
 
 getsym(expr) = typeof(expr) == Symbol ? expr : getsym(expr.args[1])
+macrosym(s) = symbol(string("@", s))
 
 # Functions
 
@@ -37,23 +38,24 @@ for expr in exprs.args
   end
 end
 
+for expr in macros.args
+  if typeof(expr) == Symbol || (typeof(expr) == Expr && expr.head != :line)
+    @eval @mmacro $(expr)
+    eval(Expr(:export, macrosym(getsym(expr))))
+  end
+end
+
 for name in @math Names("System`*")
   f = symbol(name)
   if !isdefined(f)
     @eval @mmimport $f
     eval(Expr(:export, f))
   end
-end
 
-# Macros
-
-for expr in macros.args
-  if typeof(expr) == Symbol || (typeof(expr) == Expr && expr.head != :line)
-    @eval @mmacro $(expr)
-    eval(Expr(:export, symbol(string("@", getsym(expr)))))
+  if !isdefined(macrosym(f))
+    @eval @mmacro $f
+    eval(Expr(:export, macrosym(f)))
   end
 end
-
-# Need to be able to test if a macro is defined.
 
 end
