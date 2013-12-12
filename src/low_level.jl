@@ -1,37 +1,11 @@
 module ML
-  
-# -------
-# C Utils
-# -------
 
-# Garbage collection hook?
-
-type CRef{T}
-  ptr::Ptr{T}
-end
-
-function CRef(T::DataType)
+function ptr(T)
   @assert isbits(T)
-  ptr = convert(Ptr{T}, c_malloc(sizeof(T)))
-  CRef(ptr)
+  Array(T, 1)
 end
-
-set!{T}(r::CRef{T}, x) = (unsafe_store!(r.ptr, convert(T, x)); r)
-fetch(r::CRef) = unsafe_load(r.ptr)
-free(r::CRef) = c_free(r.ptr)
-free(rs::CRef...) = for r in rs free(r) end
-
-CRef(T, v) = set!(CRef(T), v)
-CRef(v) = CRef(typeof(v), v)
-
-Base.convert{T}(::Type{Ptr{T}}, r::CRef{T}) = r.ptr
-Base.convert{T}(::Type{T}, r::CRef{T}) = fetch(r)
 
 typealias Cstr Ptr{Cchar}
-
-# -----
-# Begin
-# -----
 
 include("consts.jl")
 
@@ -47,15 +21,13 @@ function Open(path = "math")
   mlenv == C_NULL && error("Could not MLInitialize")
 
   # MLOpenString
-  local link
-  let err = CRef(Cint)
-    args = "-linkname '\"$path\" -mathlink' -linkmode launch"
-    link = ccall((:MLOpenString, @mlib), Link,
-                  (Env, Cstr, Ptr{Cint}),
-                  mlenv, args, err)
-    fetch(err)==0 || mlerror(link, "MLOpenString")
-    free(err)
-  end
+  # local link
+  err = ptr(Cint)
+  args = "-linkname '\"$path\" -mathlink' -linkmode launch"
+  link = ccall((:MLOpenString, @mlib), Link,
+                (Env, Cstr, Ptr{Cint}),
+                mlenv, args, err)
+  err[1]==0 || mlerror(link, "MLOpenString")
 
   # Ignore first input packet
   @assert NextPacket(link) == Pkt.INPUTNAME
@@ -105,47 +77,42 @@ for (f, T) in [(:GetInteger64, Int64)
                (:GetReal64, Float64)]
   fstr = string("ML", f)
   @eval function $f(link::Link)
-    i = CRef($T)
+    i = ptr($T)
     ccall(($fstr, @mlib), Cint, (Link, Ptr{$T}), link, i) != 0 ||
       mlerror(link, $fstr)
-    r = fetch(i)
-    free(i)
-    return r
+    i[1]
   end
 end
 
 function GetString(link::Link)
-  s = CRef(Cstr)
+  s = ptr(Cstr)
   ccall((:MLGetString, @mlib), Cint, (Link, Ptr{Cstr}), link, s) != 0 ||
     mlerror(link, "GetString")
-  r = s |> fetch |> bytestring |> unescape_string
+  r = s[1] |> bytestring |> unescape_string
   ReleaseString(link, s)
-  free(s)
   return r
 end
 
 function GetSymbol(link::Link)
-  s = CRef(Cstr)
+  s = ptr(Cstr)
   ccall((:MLGetSymbol, @mlib), Cint, (Link, Ptr{Cstr}), link, s) != 0 ||
     mlerror(link, "GetSymbol")
-  r = s |> fetch |> bytestring |> unescape_string |> symbol
+  r = s[1] |> bytestring |> unescape_string |> symbol
   ReleaseSymbol(link, s)
-  free(s)
   return r
 end
 
 function GetFunction(link::Link)
-  name = CRef(Cstr)
-  nargs = CRef(Cint)
+  name = ptr(Cstr)
+  nargs = ptr(Cint)
   ccall((:MLGetFunction, @mlib), Cint, (Link, Ptr{Cstr}, Ptr{Cint}),
     link, name, nargs) != 0 || mlerror(link, "MLGetFunction")
-  r = name |> fetch |> bytestring |> symbol, nargs |> fetch
+  r = name[1] |> bytestring |> symbol, nargs[1]
   ReleaseString(link, name)
-  free(name, nargs)
   return r
 end
 
-ReleaseString(link::Link, s::CRef) = ccall((:MLReleaseString, @mlib), Void, (Link, Cstr), link, s)
-ReleaseSymbol(link::Link, s::CRef) = ccall((:MLReleaseSymbol, @mlib), Void, (Link, Cstr), link, s)
+ReleaseString(link::Link, s) = ccall((:MLReleaseString, @mlib), Void, (Link, Cstr), link, s[1])
+ReleaseSymbol(link::Link, s) = ccall((:MLReleaseSymbol, @mlib), Void, (Link, Cstr), link, s[1])
 
 end
