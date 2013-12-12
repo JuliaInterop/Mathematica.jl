@@ -170,7 +170,7 @@ const aliases =
    :exp => :Exp]
 
 from_mma(x) = x
-const symbols = [:True => true, :False => false, :None => nothing]
+const symbols = [:True => true, :False => false, :Null => nothing]
 from_mma(s::Symbol) = haskey(symbols, s) ? symbols[s] : s
 
 to_mma{T<:Union(Int64,Int32,Float64,Float32,Symbol,String)}(x::T) = x
