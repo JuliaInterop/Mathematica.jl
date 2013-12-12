@@ -47,14 +47,16 @@ end
 
 for name in @math Names("System`*")
   f = symbol(name)
+  mf = macrosym(name)
+  
   if !isdefined(f)
     @eval @mmimport $f
     eval(Expr(:export, f))
   end
 
-  if !isdefined(macrosym(f))
+  if !isdefined(mf)
     @eval @mmacro $f
-    eval(Expr(:export, macrosym(f)))
+    eval(Expr(:export, mf))
   end
 end
 
