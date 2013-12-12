@@ -62,6 +62,14 @@ Binomial(10)
 #=> WARNING: Binomial::argr: Binomial called with 1 argument; 2 arguments are expected.
 #=> Binomial[10]
 ```
+Finally, of course:
+```julia
+WolframAlpha("hi") #=>
+2-element Array{Any,1}:
+ {{"Input",1},"Plaintext"}->"Hello."
+ {{"Result",1},"Plaintext"}->"Hello, human."
+```
+
 ## Advanced Use
 ### Typing
 In the file `Mathematica.jl`, you'll see a listing of function and macro specifications, each in one of these formats:
