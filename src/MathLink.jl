@@ -104,7 +104,7 @@ function meval(link::ML.Link, expr, T)
       handle_packets(link, Any) |> from_mma |> to_expr :
       handle_packets(link, T)
   catch
-    warn("Error occured in meval: you will most likely need to restart Julia/MathLink")
+    warn("Error occured in meval: you may need to restart Julia/MathLink")
     rethrow()
   end
 end
@@ -188,6 +188,11 @@ function to_mma(x::Expr)
   else
     error("Unsupported $(x.head) expression.")
   end
+end
+
+function to_mma(x::QuoteNode)
+  typeof(x.value) == Symbol && return x.value
+  error("Cannot call to_mma on QuoteNode($(x.value))")
 end
 
 # Other types
