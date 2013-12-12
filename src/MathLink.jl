@@ -153,7 +153,7 @@ function show{T}(io::IO, e::MExpr{T})
 end
 
 show(io::IO, r::MExpr{:Rule}) =
-  (show(io, r.args[1]); print("->"); show(io, r.args[2]))
+  (show(io, r.args[1]); print(io, "->"); show(io, r.args[2]))
 
 # ------------------------------------
 # Conversion to/from Mathematica data.
