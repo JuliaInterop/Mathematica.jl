@@ -7,6 +7,8 @@ using MathLink
 const exprs = quote
 
   # Typed Mathematica functions to import, in alphabetical order.
+  D::Expr
+  Integrate::Expr
   Prime(Integer)::Int
   RandomReal(Number)::Float64
   RandomReal(Number, Integer)::Vector{Float64}
@@ -48,7 +50,7 @@ end
 for name in @math Names("System`*")
   f = symbol(name)
   mf = macrosym(name)
-  
+
   if !isdefined(f)
     @eval @mmimport $f
     eval(Expr(:export, f))
