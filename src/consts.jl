@@ -68,3 +68,73 @@ module TK
   const ARRAY   = 'A'     # /* 65 0x41 01000001 */
   const DIM     = 'D'     # /* 68 0x44 01000100 */
 end
+
+module ERR
+  const UNKNOWN         =   -1
+  const OK              =    0
+  const DEAD            =    1
+  const GBAD            =    2
+  const GSEQ            =    3
+  const PBTK            =    4
+  const PSEQ            =    5
+  const PBIG            =    6
+  const OVFL            =    7
+  const MEM             =    8
+  const ACCEPT          =    9
+  const CONNECT         =   10
+  const CLOSED          =   11
+  const DEPTH           =   12  # /* internal error */
+  const NODUPFCN        =   13  # /* stream cannot be duplicated */
+
+  const NOACK           =   15  # /* */
+  const NODATA          =   16  # /* */
+  const NOTDELIVERED    =   17  # /* */
+  const NOMSG           =   18  # /* */
+  const FAILED          =   19  # /* */
+
+  const GETENDEXPR      =   20
+  const PUTENDPACKET    =   21 # /* unexpected call of MLEndPacket */
+                               # /* currently atoms aren't
+                               # * counted on the way out so this error is raised only when
+                               # * MLEndPacket is called in the midst of an atom
+                               # */
+  const NEXTPACKET      =   22
+  const UNKNOWNPACKET   =   23
+  const GETENDPACKET    =   24
+  const ABORT           =   25
+  const MORE            =   26 # /* internal error */
+  const NEWLIB          =   27
+  const OLDLIB          =   28
+  const BADPARAM        =   29
+  const NOTIMPLEMENTED  =   30
+
+
+  const INIT            =   32
+  const ARGV            =   33
+  const PROTOCOL        =   34
+  const MODE            =   35
+  const LAUNCH          =   36
+  const LAUNCHAGAIN     =   37
+  const LAUNCHSPACE     =   38
+  const NOPARENT        =   39
+  const NAMETAKEN       =   40
+  const NOLISTEN        =   41
+  const BADNAME         =   42
+  const BADHOST         =   43
+  const RESOURCE        =   44  # /* a required resource was missing */
+  const LAUNCHFAILED    =   45
+  const LAUNCHNAME      =   46
+
+  const PDATABAD        =   47
+  const PSCONVERT       =   48
+  const GSCONVERT       =   49
+  const NOTEXE          =   50
+  const SYNCOBJECTMAKE  =   51
+  const BACKOUT         =   52
+
+  const TRACEON         =  996  # /* */
+  const TRACEOFF        =  997  # /* */
+  const DEBUG           =  998  # /* */
+  const ASSERT          =  999  # /* an internal assertion failed */
+  const USER            = 1000  # /* start of user defined errors */
+end

@@ -4,6 +4,8 @@ module ML
 # C Utils
 # -------
 
+# Garbage collection hook?
+
 type CRef{T}
   ptr::Ptr{T}
 end
@@ -125,7 +127,7 @@ end
 function GetSymbol(link::Link)
   s = CRef(Cstr)
   ccall((:MLGetSymbol, @mlib), Cint, (Link, Ptr{Cstr}), link, s) != 0 ||
-    mlerror(link, "GetString")
+    mlerror(link, "GetSymbol")
   r = s |> fetch |> bytestring |> unescape_string |> symbol
   ReleaseSymbol(link, s)
   free(s)
