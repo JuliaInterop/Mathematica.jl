@@ -1,53 +1,108 @@
 # Mathematica.jl
 
-lets you call Mathematica functions from Julia.
+is a no-hassle Julia interface to Mathematica. It aims to follow Julia's philosophy of combining high-level expressiveness without sacrificing low-level optimisation.
 
 ```julia
-Pkg.clone("Mathematica")
+Pkg.clone("Mathematica") # Note "clone" not "add"
 ````
-
 Provided Mathematica is installed, its usage is as simple as:
 
 ```julia
 using Mathematica
 Fibonacci(1000)
-#=> 4346655768693745643568852767...
+#=> 43466557686937456435688527675040625802564660517371780402481729089536555417949051890403879840079255169295922593080322634775209689623239873322471161642996440906533187938298969649928516003704476137795166849228875
 ```
-This should work so long as either `math` is on the path (normally true on linux). `Mathematica.jl` will also look for `math.exe` on Windows, which should work for Mathematica versions 8 or 9 installed in default locations. If it doesn't work for you, open an issue.
+All of Mathematica's functions are available as both functions and macros, and splicing (`$`) works as you would expect:
+```julia
+Integrate(:(x^2), :x) # or
+@Integrate(x^2, x)
+#=> :(*(1//3,^(x,3)))
 
-As well the Julia wrappers defined in the `Mathematica` module, you can use the `@math` macro:
+@Integrate(log(x), {x,0,2})
+#=> :(+(-2,log(4)))
 
+eval(ans) # or
+@N($ans) # or
+N(ans) # or
+@N(Integrate(log(x), {x,0,2}))
+#=> -0.6137056388801094
+```
+Including those that return Mathematica data:
+```julia
+@Plot(x^2, {x,0,2})
+#=> Graphics[{{{},{},{Hue[0.67, 0.6, 0.6],Line[{{4.081632653061224e-8,1.6659725114535607e-15},...}]}}}, {:AspectRatio->Power[:GoldenRatio, -1],:Axes->true, ...}]
+```
+Mathematical data can participate in Julia functions directly, with no wrapping required. For example -
 ```julia
 using MathLink
-n = 2
-@math NIntegrate(Power(x,2), List(x, 0, $n))
-#=> 2.6666666666666705
+d = BinomialDistribution(10,0.2) #=> BinomialDistribution[10, 0.2]
+probability(b::MExpr{:BinomialDistribution}) = b.args[2]
+probability(d) #=> 0.2
 ```
-This is useful when you want to optimise by avoiding the movement of values in and out of Mathematica's memory.
 
-You can also define your own wrappers easily enough, via one of the following:
+Julia compatible data (e.g. lists, complex numbers etc.) will all be converted automatically, and you can extend the conversion to other types.
 
+Note that Mathematica expressions are *not* converted to Julia expressions by default. Functions/macros with the `::Expr` hint (see below) will convert their result, but for others you must use `convert` or `MathLink.to_expr`.
 
 ```julia
-@mmimport Function
-@mmimport Function::ReturnType
-@mmimport Function(Arg1Type, Arg2Type, ...)::ReturnType
+Log(-1) #=> Times[0 + 1im, :Pi]
+convert(Expr, ans) #=> :(*(0 + 1im,Pi))
+N(Log(-1)) #=> 0.0 + 3.141592653589793im
 ```
-For example, `Prime` and `Fibonacci` are defined by
+Printing and warnings are also supported:
+```julia
+Print("hi")
+#=> hi
+@Print(x^2/3)
+#=>  2
+#   x
+#   --
+#   3
+Binomial(10)
+#=> WARNING: Binomial::argr: Binomial called with 1 argument; 2 arguments are expected.
+#=> Binomial[10]
+```
+## Advanced Use
+### Typing
+In the file `Mathematica.jl`, you'll see a listing of function and macro specifications, each in one of these formats:
+```julia
+Function::ReturnType # or
+Function(Arg1Type, Arg2Type, ...)::ReturnType # (functions only)
+```
+For example:
+```julia
+Integrate::Expr
+RandomReal(Number)::Float64
+RandomReal(Number, Integer)::Vector{Float64}
+```
+The return type hint here is an optimisation; it allows `MathLink.jl` to grab the value from Mathematica without first doing a type check, and makes the function type stable - for example, `RandomReal(10, 5)` would return an `Any` array if not for this definition. The argument types allow type checking and multiple definitions.
+
+Not many functions have type signatures yet, so providing them for the functions you want to use is an easy way to contribute.
+
+### Extending to custom datatypes
+
+The Mathematica data expression `Head[x,y,z,...]` is represented in Julia as `MExpr{:Head}(args = {x,y,z,...})`. We can extend `Mathematica.jl` to support custom types by overloading `MathLink.to_mma` and `MathLink.from_mma`.
+
+For example, we can pass a Julia Dict straight through Mathematica with just two lines of definitions:
+```julia
+using MathLink; import MathLink: to_mma, from_mma
+d = [:a => 1, :b => 2]
+
+to_mma(d::Dict) = MExpr{:Dict}(map(x->MExpr(:Rule, x[1], x[2]),d))
+Identity(d) #=> Dict[:b->2, :a->1]
+from_mma(d::MExpr{:Dict}) = Dict(map(x->x.args[1], d.args), map(x->x.args[2], d.args))
+Identity(d) #=> {:b=>2,:a=>1}
+```
+
+## Usage Issues
 
 ```julia
-@mmimport Prime(Integer)::Int, Fibonacci(Integer)::BigInt
+using Mathematica
 ```
-Annotating the return type is potentially a good optimisation since it prevents type checking, but beware that it can cause errors if, for example, the function can return unevaluated. Annotating argument types allows you to give multiple definitions.
-
-At the moment, very few functions are wrapped by default; if you're using this library and want to contribute, an easy way to do so is to add the signatures of functions you want to use to `Mathematica.jl`.
-
-Please also open issues for any improvements you want to see.
+This should work so long as either `math` is on the path (normally true on linux). `Mathematica.jl` will also look for `math.exe` on Windows, which should work for Mathematica versions 8 or 9 installed in default locations. If it doesn't work for you, open an issue (in particular I don't know how this will behave on Macs).
 
 ## Current Limitations / Planned Features
 * Error handling: Error checking is currently reasonable, but the only way to reset the current link once an error is encountered is to restart Julia.
-* Function aliasing: Expressions should be translated e.g. `*(x,y) => Times(x,y)` and back.
-* Similarly, custom data types can be supported by extending `put!()` but not from MMA -> Julia.
-* Passing arrays directly is not yet supported; `[1,2,3]` must be passed and returned as `:(List(1,2,3))`
+* Passing native arrays and matrices is not currently supported.
 * MRefs: see the MVars section of [clj-mma](https://github.com/one-more-minute/clj-mma?source=c#mathematica-vars)
-* Connect to a running session and injecting callbacks to Julia functions would be really cool, but isn't something I've looked into.
+* Connect to a running session and injecting callbacks to Julia functions would be really cool, but would probably require a C extension for Mathematica.
