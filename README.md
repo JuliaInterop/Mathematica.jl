@@ -1,5 +1,7 @@
 # Mathematica.jl
 
+[![Gitter chat](https://badges.gitter.im/one-more-minute/Mathematica.jl.png)](https://gitter.im/one-more-minute/Mathematica.jl)
+
 The `Mathematica.jl` package provides an interface for using [Wolfram Mathematica™](http://www.wolfram.com/mathematica/) from the [Julia language](http://julialang.org). You cannot use `Mathematica.jl` without having purchased and installed a copy of Mathematica™ from [Wolfram Research](http://www.wolfram.com/). This package is available free of charge and in no way replaces or alters any functionality of Wolfram's Mathematica product.
 
 The package provides is a no-hassle Julia interface to Mathematica. It aims to follow Julia's philosophy of combining high-level expressiveness without sacrificing low-level optimisation.
