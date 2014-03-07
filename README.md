@@ -7,7 +7,7 @@ The `Mathematica.jl` package provides an interface for using [Wolfram Mathematic
 The package provides is a no-hassle Julia interface to Mathematica. It aims to follow Julia's philosophy of combining high-level expressiveness without sacrificing low-level optimisation.
 
 ```julia
-Pkg.clone("Mathematica") # Note "clone" not "add"
+Pkg.add("Mathematica")
 ````
 Provided Mathematica is installed, its usage is as simple as:
 
