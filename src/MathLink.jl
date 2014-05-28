@@ -85,8 +85,14 @@ end
   ["C:\\Program Files\\Wolfram Research\\Mathematica\\9.0\\math.exe"
    "C:\\Program Files\\Wolfram Research\\Mathematica\\8.0\\math.exe"]
 
+@osx_only const osxtestpaths =
+ ["/Applications/Mathematica.app/Contents/MacOS/MathKernel"]
+
 function math_path()
   @windows_only for path in wintestpaths
+    isfile(path) && return path
+  end
+  @osx_only for path in osxtestpaths
     isfile(path) && return path
   end
   "math"
