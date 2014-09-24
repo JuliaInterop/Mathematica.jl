@@ -40,7 +40,7 @@ macro mmimport(expr)
     elseif expr.args[1].head == :call
       fsym = expr.args[1].args[1]
       f = esc(fsym)
-      args, typed_args = proc_argtypes(expr.args[1].args[2:])
+      args, typed_args = proc_argtypes(expr.args[1].args[2:end])
       rettype = esc(expr.args[2])
       :($f($(typed_args...)) =
           meval(Expr(:call, $(Expr(:quote, fsym)), $(args...)), $rettype))
@@ -151,7 +151,7 @@ function show{T}(io::IO, e::MExpr{T})
   print(io, T)
   if length(e.args) >= 1
     print(io, "["); show(io, e.args[1])
-    for x in e.args[2:] print(io, ", "); show(io, x) end
+    for x in e.args[2:end] print(io, ", "); show(io, x) end
     print(io, "]")
   else
     print(io, "[]")
@@ -184,7 +184,7 @@ to_mma{T<:Union(Int64,Int32,Float64,Float32,Symbol,String)}(x::T) = x
 function to_mma(x::Expr)
   if x.head == :call
     head = haskey(aliases, x.args[1]) ? aliases[x.args[1]] : x.args[1]
-    MExpr{head}(map(to_mma, x.args[2:]))
+    MExpr{head}(map(to_mma, x.args[2:end]))
   elseif x.head == :block
     MExpr{:CompoundExpression}(map(to_mma, x.args))
   elseif x.head == :ref
@@ -254,7 +254,7 @@ function get!(link::ML.Link)
 
   if t == ML.TK.INT
     i = get!(link, BigInt)
-    typemin(Int) <= i <= typemax(Int) ? int(i) : i 
+    typemin(Int) <= i <= typemax(Int) ? int(i) : i
 
   elseif t == ML.TK.FUNC
     f, nargs = ML.GetFunction(link)
