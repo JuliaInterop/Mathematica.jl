@@ -1,5 +1,3 @@
-include("MathLink.jl")
-
 module Mathematica
 
 using MathLink
