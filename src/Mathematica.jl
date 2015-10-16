@@ -10,7 +10,7 @@ const exprs = quote
   Prime(Integer)::Int
   RandomReal(Number)::Float64
   RandomReal(Number, Integer)::Vector{Float64}
-  ToString::String
+  ToString::UTF8String
 
 end
 
