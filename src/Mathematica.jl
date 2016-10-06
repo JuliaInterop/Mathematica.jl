@@ -10,7 +10,7 @@ const exprs = quote
   Prime(Integer)::Int
   RandomReal(Number)::Float64
   RandomReal(Number, Integer)::Vector{Float64}
-  ToString::UTF8String
+  ToString::String
 
 end
 
@@ -46,7 +46,7 @@ for expr in macros.args
 end
 
 for name in @math Names("System`*")
-  f = symbol(name)
+  f = Symbol(name)
   mf = macrosym(name)
 
   if !isdefined(f)
