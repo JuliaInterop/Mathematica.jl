@@ -27,7 +27,7 @@ end
 # -----------
 
 getsym(expr) = typeof(expr) == Symbol ? expr : getsym(expr.args[1])
-macrosym(s) = symbol(string("@", s))
+macrosym(s) = Symbol(string("@", s))
 
 # Functions
 
