@@ -27,7 +27,7 @@ end
 # -----------
 
 getsym(expr) = typeof(expr) == Symbol ? expr : getsym(expr.args[1])
-macrosym(s) = symbol(string("@", s))
+macrosym(s) = Symbol(string("@", s))
 
 # Functions
 
@@ -46,7 +46,7 @@ for expr in macros.args
 end
 
 for name in @math Names("System`*")
-  f = symbol(name)
+  f = Symbol(name)
   mf = macrosym(name)
 
   if !isdefined(f)
