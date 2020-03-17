@@ -1,6 +1,6 @@
 # Mathematica.jl
 
-## Warning: Mathematica.jl is no longer activly maintained. Head over to [MathLink.jl](https://github.com/JuliaInterop/MathLink.jl) for similar functionality. 
+## Warning: Mathematica.jl is no longer actively maintained. Head over to [MathLink.jl](https://github.com/JuliaInterop/MathLink.jl) for similar functionality. 
 
 [![Gitter chat](https://badges.gitter.im/one-more-minute/Mathematica.jl.png)](https://gitter.im/one-more-minute/Mathematica.jl)
 
